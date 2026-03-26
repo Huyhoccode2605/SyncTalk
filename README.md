@@ -1,2 +1,2 @@
 # SyncTalk
-Full-Stack Real-Time Thread &amp; Messaging Ecosystem
+Full-Stack Real-Time Thread &amp; Messaging App
