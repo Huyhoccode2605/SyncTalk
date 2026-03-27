@@ -1,6 +1,6 @@
 # backend/app/controllers/message_controller.py
 
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from app.services.message_service import MessageService
 from app.utils.jwt_helper import token_required
 from app.utils.response import success_response, error_response
@@ -25,40 +25,6 @@ def get_conversation(current_user, receiver_id):
             'created_at': str(m.created_at),
             'edited_at': str(m.edited_at) if m.edited_at else None
         } for m in messages]
-    )
-
-@message_bp.route('', methods=['POST'])
-@token_required
-def send_message(current_user):
-    data = request.get_json()
-    if not data:
-        return error_response('No data provided', 400)
-
-    receiver_id = data.get('receiver_id')
-    content = data.get('content')
-    image_url = data.get('image_url')
-
-    if not receiver_id:
-        return error_response('Receiver id is required', 400)
-
-    message, error = message_service.send_message(
-        current_user.id, receiver_id, content, image_url
-    )
-    if error:
-        return error_response(error, 400)
-
-    return success_response(
-        data={
-            'id': message.id,
-            'sender_id': message.sender_id,
-            'receiver_id': message.receiver_id,
-            'content': message.content,
-            'image_url': message.image_url,
-            'is_read': message.is_read,
-            'created_at': str(message.created_at)
-        },
-        message='Message sent successfully',
-        status_code=201
     )
 
 @message_bp.route('/<message_id>', methods=['PUT'])
@@ -112,3 +78,5 @@ def mark_as_read(current_user, sender_id):
     if error:
         return error_response(error, 400)
     return success_response(message='Messages marked as read')
+
+

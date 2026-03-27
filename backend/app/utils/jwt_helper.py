@@ -1,7 +1,8 @@
 # backend/app/utils/jwt_helper.py
-
+import os
+import jwt
 from functools import wraps
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 from app.services.auth_service import AuthService
 
 auth_service = AuthService()
@@ -26,3 +27,18 @@ def token_required(f):
 
         return f(user, *args, **kwargs)
     return decorated
+
+
+def decode_token(token):
+    try:
+        payload = jwt.decode(token, current_app.config['JWT_SECRET_KEY'], algorithms=['HS256'])
+        return payload
+    except jwt.ExpiredSignatureError:
+        print("Lỗi: Token đã hết hạn!")
+        return None
+    except jwt.InvalidTokenError:
+        print("Lỗi: Token không hợp lệ!")
+        return None
+    except Exception as e:
+        print(f"Lỗi giải mã JWT: {e}")
+        return None

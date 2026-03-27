@@ -3,6 +3,8 @@
 import jwt
 import os
 from datetime import datetime, timezone, timedelta
+
+
 from app import bcrypt
 from app.repositories.user_repository import UserRepository
 
@@ -28,6 +30,12 @@ class AuthService:
 
         if not bcrypt.check_password_hash(user.password_hash, password):
             return None, None, 'Incorrect password'
+
+        # Cập nhật last_seen mỗi lần đăng nhập
+        from datetime import datetime, timezone
+        user.last_seen = datetime.now(timezone.utc)
+        from app import db
+        db.session.commit()
 
         token = self._generate_token(user.id)
         return user, token, None

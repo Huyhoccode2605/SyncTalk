@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import { useAuthStore } from '@/lib/auth-store'
-import { set } from "zod";
 
 type UseSocketResult = {
   socket: Socket | null;
@@ -39,6 +38,7 @@ export function useSocket(): UseSocketResult {
   const handleConnect = () => {
     console.log('[Socket Connected]', socketInstance.id)
     setConnected(true)
+    socketInstance.emit('join', { token})
   }
 
   const handleDisConnect = (reason: any) => {
@@ -58,6 +58,7 @@ export function useSocket(): UseSocketResult {
     socketInstance.off('connect', handleConnect)
     socketInstance.off('disconnect', handleDisConnect)
     socketInstance.off('connect_error', handleConnectError)
+    socketInstance.emit('user_disconnect', { token })
     socketInstance.disconnect()
     setConnected(false)
     setSocket(null)

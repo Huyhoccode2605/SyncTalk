@@ -23,16 +23,25 @@ class MessageService:
         if blocked_repo.is_blocked(receiver_id, sender_id):
             return None, 'You are blocked by this user'
 
-        message = message_repo.create(sender_id, receiver_id, content, image_url)
-
-        notif_repo.create(
-            user_id=receiver_id,
-            type='message',
-            message='You have a new message',
-            reference_id=sender_id
+        message = message_repo.create(
+            sender_id=sender_id,
+            receiver_id=receiver_id,
+            content=content,
+            image_url=image_url
         )
 
+        # Thông báo (chỉ cho chat cá nhân hoặc logic thông báo nhóm của bạn)
+        if receiver_id:
+            notif_repo.create(
+                user_id=receiver_id,
+                type='message',
+                message='You have a new message',
+                reference_id=sender_id
+            )
+
         return message, None
+
+
 
     def get_conversation(self, user1_id, user2_id):
         user = user_repo.find_by_id(user2_id)

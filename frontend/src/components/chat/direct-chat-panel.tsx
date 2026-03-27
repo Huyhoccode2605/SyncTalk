@@ -84,18 +84,12 @@ function DirectChatPanel(props: DirectChatPanelProps) {
         if (!socket) return;
 
         function handleMessage(message: DirectMessage) {
-            if (
-                message.sender_id !== otherUserId &&
-                message.receiver_id !== otherUserId
-            ) return;
-
-            setMessages((prev) => {
-                const exists = prev.find((m) => m.id === message.id);
-                if (exists) return prev;
-                return [...prev, message];
-            });
-        }
-
+        setMessages((prev) => {
+            const exists = prev.find((m) => m.id === message.id);
+            if (exists) return prev;
+            return [...prev, message];
+        });
+    }
         function handleTyping(payload: { user_id: string }) {
             if (payload.user_id !== otherUserId) return;
             setTypingLabel("Đang nhập...");
@@ -156,6 +150,17 @@ function DirectChatPanel(props: DirectChatPanelProps) {
                 receiver_id: otherUserId,
                 content: body,
             });
+            const optimisticMessage: DirectMessage = {
+                id: Date.now().toString(),
+                sender_id: user?.id || '',
+                receiver_id: otherUserId,
+                content: body,
+                image_url: null,
+                is_read: false,
+                created_at: new Date().toISOString(),
+                edited_at: null,
+            }
+            setMessages((prev) => [...prev, optimisticMessage])
             setInput("");
             if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
             socket.emit("stop_typing", { token, receiver_id: otherUserId });
@@ -173,9 +178,8 @@ function DirectChatPanel(props: DirectChatPanelProps) {
                     <CardTitle className="text-base text-foreground">{title}</CardTitle>
                     <p className="mt-0.5 text-xs text-muted-foreground">Tin nhắn trực tiếp</p>
                 </div>
-                <span className={`flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-medium ${
-                    connected ? "bg-primary/10 text-primary" : "bg-accent text-accent-foreground"
-                }`}>
+                <span className={`flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-medium ${connected ? "bg-primary/10 text-primary" : "bg-accent text-accent-foreground"
+                    }`}>
                     {connected ? (
                         <><Wifi className="w-3 h-3" />Online</>
                     ) : (
@@ -212,17 +216,15 @@ function DirectChatPanel(props: DirectChatPanelProps) {
                             key={msg.id}
                         >
                             <div className={`max-w-xs ${isOther ? "" : "order-2"}`}>
-                                <div className={`mb-1 text-[12px] font-medium ${
-                                    isOther ? "text-muted-foreground" : "text-muted-foreground text-right"
-                                }`}>
+                                <div className={`mb-1 text-[12px] font-medium ${isOther ? "text-muted-foreground" : "text-muted-foreground text-right"
+                                    }`}>
                                     {label} - {time}
                                 </div>
                                 {msg?.content && (
-                                    <div className={`inline-block rounded-lg px-3 py-2 ${
-                                        isOther
+                                    <div className={`inline-block rounded-lg px-3 py-2 ${isOther
                                             ? "bg-accent text-accent-foreground"
                                             : "bg-primary/80 text-primary-foreground"
-                                    }`}>
+                                        }`}>
                                         <p className="text-[16px] leading-relaxed">{msg.content}</p>
                                     </div>
                                 )}

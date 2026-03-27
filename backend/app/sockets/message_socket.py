@@ -73,8 +73,8 @@ def on_send_message(data):
         'created_at': str(message.created_at)
     }
 
+    # Chỉ emit cho người nhận — sender đã hiển thị qua optimistic UI ở frontend
     emit('new_message', message_data, room=receiver_id)
-    emit('new_message', message_data, room=user.id)
 
 @socketio.on('typing')
 def on_typing(data):
